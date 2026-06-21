@@ -1,8 +1,9 @@
 'use client';
 
-import { createContext, useContext, useReducer, useCallback, ReactNode } from 'react';
+import { createContext, useContext, useReducer, useCallback, useEffect, useRef, ReactNode } from 'react';
 import { ajax } from '@/lib/api';
 import { API_URL, KEY, RES_PER_PAGE } from '@/lib/config';
+import { LOCAL_RECIPES } from '@/lib/localRecipes';
 
 export type Ingredient = {
   quantity: number | null;
@@ -42,6 +43,7 @@ type State = {
   recipe: Recipe | null;
   search: SearchState;
   bookmarks: Recipe[];
+  localRecipes: Recipe[];
   loading: boolean;
   error: string | null;
   searchLoading: boolean;
@@ -58,7 +60,8 @@ type Action =
   | { type: 'UPDATE_SERVINGS'; payload: number }
   | { type: 'ADD_BOOKMARK'; payload: Recipe }
   | { type: 'REMOVE_BOOKMARK'; payload: string }
-  | { type: 'INIT_BOOKMARKS'; payload: Recipe[] };
+  | { type: 'INIT_BOOKMARKS'; payload: Recipe[] }
+  | { type: 'ADD_LOCAL_RECIPE'; payload: Recipe };
 
 function loadBookmarks(): Recipe[] {
   try {
@@ -77,6 +80,7 @@ const initialState: State = {
   recipe: null,
   search: { query: '', results: [], page: 1, resultsPerPage: RES_PER_PAGE },
   bookmarks: [],
+  localRecipes: LOCAL_RECIPES,
   loading: false,
   error: null,
   searchLoading: false,
@@ -137,6 +141,8 @@ function reducer(state: State, action: Action): State {
     }
     case 'INIT_BOOKMARKS':
       return { ...state, bookmarks: action.payload };
+    case 'ADD_LOCAL_RECIPE':
+      return { ...state, localRecipes: [action.payload, ...state.localRecipes] };
     default:
       return state;
   }
@@ -175,11 +181,26 @@ function createRecipeObject(data: Record<string, Record<string, unknown>>): Reci
 export function RecipeProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState);
 
+  const localRecipesRef = useRef(state.localRecipes);
+  useEffect(() => {
+    localRecipesRef.current = state.localRecipes;
+  }, [state.localRecipes]);
+
   const initBookmarks = useCallback(() => {
     dispatch({ type: 'INIT_BOOKMARKS', payload: loadBookmarks() });
   }, []);
 
   const loadRecipe = useCallback(async (id: string) => {
+    const local = localRecipesRef.current.find(r => r.id === id);
+    if (local) {
+      const bookmarks: Recipe[] = loadBookmarks();
+      dispatch({
+        type: 'LOAD_RECIPE_SUCCESS',
+        payload: { ...local, bookmarked: bookmarks.some(b => b.id === id) },
+      });
+      return;
+    }
+
     dispatch({ type: 'LOAD_RECIPE_START' });
     try {
       const data = await ajax(`${API_URL}/${id}?key=${KEY}`);
@@ -262,6 +283,7 @@ export function RecipeProvider({ children }: { children: ReactNode }) {
       const recipe = createRecipeObject(data);
       dispatch({ type: 'ADD_BOOKMARK', payload: recipe });
       dispatch({ type: 'LOAD_RECIPE_SUCCESS', payload: { ...recipe, bookmarked: true } });
+      dispatch({ type: 'ADD_LOCAL_RECIPE', payload: { ...recipe, bookmarked: true } });
     },
     []
   );

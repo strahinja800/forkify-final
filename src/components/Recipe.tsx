@@ -74,7 +74,7 @@ export default function Recipe() {
       <figure className='relative h-[32rem] [transform-origin:top]'>
         <div className='absolute inset-0 bg-gradient-to-br from-[#fbdb89] to-[#f48982] opacity-60 z-10' />
         <Image
-          src={`/${recipe.image}`}
+          src={recipe.image}
           alt={recipe.title}
           fill
           className='object-cover'

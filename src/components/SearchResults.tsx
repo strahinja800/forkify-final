@@ -42,6 +42,34 @@ export default function SearchResults({ activeId }: Props) {
     );
   }
 
+  if (search.results.length === 0) {
+    return (
+      <div className="py-[3rem] flex flex-col h-full" style={{ gridArea: 'list' }}>
+        <ul className="list-none mb-[2rem]">
+          {state.localRecipes.map(recipe => (
+            <PreviewItem
+              key={recipe.id}
+              recipe={recipe}
+              activeId={activeId}
+            />
+          ))}
+        </ul>
+        <p className="text-[#918581] text-[1.2rem] px-[3.5rem] mt-auto pt-[4rem]">
+          &copy; Copyright by{' '}
+          <a
+            className="text-[#918581]"
+            target="_blank"
+            rel="noreferrer"
+            href="https://twitter.com/jonasschmedtman"
+          >
+            Jonas Schmedtmann
+          </a>
+          . Use for learning or your portfolio. Don&apos;t use to teach. Don&apos;t claim as your own.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="py-[3rem] flex flex-col h-full" style={{ gridArea: 'list' }}>
       <ul className="list-none mb-[2rem]">
