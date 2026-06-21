@@ -1,49 +1,95 @@
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@import url('https://fonts.googleapis.com/css?family=Nunito+Sans:400,600,700');
+@import 'tailwindcss';
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-html {
-  height: 100%;
-}
-
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-
-body {
-  min-height: 100%;
-  display: flex;
-  flex-direction: column;
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@theme {
+  --color-primary: #f38e82;
+  --color-grad-1: #fbdb89;
+  --color-grad-2: #f48982;
+  --color-grey-light-1: #f9f5f3;
+  --color-grey-light-2: #f2efee;
+  --color-grey-light-3: #d3c7c3;
+  --color-grey-dark-1: #615551;
+  --color-grey-dark-2: #918581;
+  --font-sans: 'Nunito Sans', sans-serif;
 }
 
 * {
   box-sizing: border-box;
-  padding: 0;
-  margin: 0;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+html {
+  font-size: 62.5%;
 }
 
-@media (prefers-color-scheme: dark) {
+@media only screen and (max-width: 61.25em) {
   html {
-    color-scheme: dark;
+    font-size: 50%;
   }
+}
+
+body {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--color-grey-dark-1);
+  background-image: linear-gradient(
+    to right bottom,
+    var(--color-grad-1),
+    var(--color-grad-2)
+  );
+  background-size: cover;
+  background-repeat: no-repeat;
+  min-height: calc(100vh - 8vw);
+}
+
+/* ========== MAIN GRID ========== */
+
+.forkify-container {
+  max-width: 120rem;
+  min-height: calc(100vh - 8vw);
+  margin: 4vw auto;
+  background-color: #fff;
+  border-radius: 9px;
+  overflow: hidden;
+  box-shadow: 0 2rem 6rem 0.5rem rgba(97, 85, 81, 0.2);
+  display: grid;
+  grid-template-rows: 10rem 1fr;
+  grid-template-columns: 1fr 2fr;
+  grid-template-areas:
+    'head head'
+    'list recipe';
+}
+
+@media only screen and (max-width: 78.15em) {
+  .forkify-container {
+    max-width: 100%;
+    margin: 0;
+    border-radius: 0;
+  }
+}
+
+/* ========== SPINNER ANIMATION ========== */
+@keyframes rotate {
+  0% {
+    transform: rotate(0);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: rotate 2s infinite linear;
+}
+
+/* box-decoration-break ne moze u Tailwind */
+.recipe-title-span {
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  padding: 1.3rem 2rem;
+  background-image: linear-gradient(
+    to right bottom,
+    var(--color-grad-1),
+    var(--color-grad-2)
+  );
 }
