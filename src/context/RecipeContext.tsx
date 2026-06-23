@@ -1,6 +1,15 @@
 'use client';
 
-import { createContext, useContext, useReducer, useCallback, useEffect, useRef, ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useReducer,
+  useCallback,
+  useEffect,
+  useRef,
+  ReactNode,
+} from 'react';
+import { useSession } from 'next-auth/react';
 import { ajax } from '@/lib/api';
 import { API_URL, KEY, RES_PER_PAGE } from '@/lib/config';
 import { LOCAL_RECIPES } from '@/lib/localRecipes';
@@ -61,9 +70,10 @@ type Action =
   | { type: 'ADD_BOOKMARK'; payload: Recipe }
   | { type: 'REMOVE_BOOKMARK'; payload: string }
   | { type: 'INIT_BOOKMARKS'; payload: Recipe[] }
-  | { type: 'ADD_LOCAL_RECIPE'; payload: Recipe };
+  | { type: 'ADD_LOCAL_RECIPE'; payload: Recipe }
+  | { type: 'RESET_LOCAL_RECIPES' };
 
-function loadBookmarks(): Recipe[] {
+function loadBookmarksFromStorage(): Recipe[] {
   try {
     const stored = localStorage.getItem('bookmarks');
     return stored ? JSON.parse(stored) : [];
@@ -72,7 +82,7 @@ function loadBookmarks(): Recipe[] {
   }
 }
 
-function saveBookmarks(bookmarks: Recipe[]) {
+function saveBookmarksToStorage(bookmarks: Recipe[]) {
   localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
 }
 
@@ -123,7 +133,6 @@ function reducer(state: State, action: Action): State {
     }
     case 'ADD_BOOKMARK': {
       const bookmarks = [...state.bookmarks, action.payload];
-      saveBookmarks(bookmarks);
       return {
         ...state,
         bookmarks,
@@ -132,17 +141,28 @@ function reducer(state: State, action: Action): State {
     }
     case 'REMOVE_BOOKMARK': {
       const bookmarks = state.bookmarks.filter(b => b.id !== action.payload);
-      saveBookmarks(bookmarks);
       return {
         ...state,
         bookmarks,
         recipe: state.recipe ? { ...state.recipe, bookmarked: false } : state.recipe,
       };
     }
-    case 'INIT_BOOKMARKS':
-      return { ...state, bookmarks: action.payload };
+    case 'INIT_BOOKMARKS': {
+      const isCurrentBookmarked = state.recipe
+        ? action.payload.some(b => b.id === state.recipe!.id)
+        : false;
+      return {
+        ...state,
+        bookmarks: action.payload,
+        recipe: state.recipe
+          ? { ...state.recipe, bookmarked: isCurrentBookmarked }
+          : state.recipe,
+      };
+    }
     case 'ADD_LOCAL_RECIPE':
       return { ...state, localRecipes: [action.payload, ...state.localRecipes] };
+    case 'RESET_LOCAL_RECIPES':
+      return { ...state, localRecipes: LOCAL_RECIPES };
     default:
       return state;
   }
@@ -158,42 +178,47 @@ type ContextValue = {
   addBookmark: (recipe: Recipe) => void;
   removeBookmark: (id: string) => void;
   uploadRecipe: (data: Record<string, string>) => Promise<void>;
-  initBookmarks: () => void;
 };
 
 const RecipeContext = createContext<ContextValue | null>(null);
 
-function createRecipeObject(data: Record<string, Record<string, unknown>>): Recipe {
-  const { recipe } = data.data as { recipe: Record<string, unknown> };
-  return {
-    id: recipe.id as string,
-    title: recipe.title as string,
-    publisher: recipe.publisher as string,
-    sourceUrl: recipe.source_url as string,
-    image: recipe.image_url as string,
-    servings: recipe.servings as number,
-    cookingTime: recipe.cooking_time as number,
-    ingredients: recipe.ingredients as Ingredient[],
-    ...(recipe.key ? { key: recipe.key as string } : {}),
-  };
-}
-
 export function RecipeProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const { data: session, status } = useSession();
 
   const localRecipesRef = useRef(state.localRecipes);
   useEffect(() => {
     localRecipesRef.current = state.localRecipes;
   }, [state.localRecipes]);
 
-  const initBookmarks = useCallback(() => {
-    dispatch({ type: 'INIT_BOOKMARKS', payload: loadBookmarks() });
-  }, []);
+  useEffect(() => {
+    if (status === 'loading') return;
+
+    if (status === 'authenticated') {
+      fetch('/api/bookmarks')
+        .then(r => r.json())
+        .then(data => dispatch({ type: 'INIT_BOOKMARKS', payload: data.bookmarks ?? [] }))
+        .catch(() => {});
+
+      dispatch({ type: 'RESET_LOCAL_RECIPES' });
+      fetch('/api/recipes')
+        .then(r => r.json())
+        .then(data => {
+          (data.recipes ?? []).forEach((r: Recipe) =>
+            dispatch({ type: 'ADD_LOCAL_RECIPE', payload: r })
+          );
+        })
+        .catch(() => {});
+    } else {
+      dispatch({ type: 'INIT_BOOKMARKS', payload: loadBookmarksFromStorage() });
+      dispatch({ type: 'RESET_LOCAL_RECIPES' });
+    }
+  }, [status]);
 
   const loadRecipe = useCallback(async (id: string) => {
     const local = localRecipesRef.current.find(r => r.id === id);
     if (local) {
-      const bookmarks: Recipe[] = loadBookmarks();
+      const bookmarks: Recipe[] = loadBookmarksFromStorage();
       dispatch({
         type: 'LOAD_RECIPE_SUCCESS',
         payload: { ...local, bookmarked: bookmarks.some(b => b.id === id) },
@@ -204,10 +229,21 @@ export function RecipeProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'LOAD_RECIPE_START' });
     try {
       const data = await ajax(`${API_URL}/${id}?key=${KEY}`);
-      const recipe = createRecipeObject(data);
-      const bookmarks: Recipe[] = loadBookmarks();
-      recipe.bookmarked = bookmarks.some(b => b.id === id);
-      dispatch({ type: 'LOAD_RECIPE_SUCCESS', payload: recipe });
+      const { recipe } = data.data as { recipe: Record<string, unknown> };
+      const loaded: Recipe = {
+        id: recipe.id as string,
+        title: recipe.title as string,
+        publisher: recipe.publisher as string,
+        sourceUrl: recipe.source_url as string,
+        image: recipe.image_url as string,
+        servings: recipe.servings as number,
+        cookingTime: recipe.cooking_time as number,
+        ingredients: recipe.ingredients as Ingredient[],
+        ...(recipe.key ? { key: recipe.key as string } : {}),
+      };
+      const bookmarks: Recipe[] = loadBookmarksFromStorage();
+      loaded.bookmarked = bookmarks.some(b => b.id === id);
+      dispatch({ type: 'LOAD_RECIPE_SUCCESS', payload: loaded });
     } catch (err) {
       dispatch({ type: 'LOAD_RECIPE_ERROR', payload: (err as Error).message });
     }
@@ -249,16 +285,40 @@ export function RecipeProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'UPDATE_SERVINGS', payload: n });
   }, []);
 
-  const addBookmark = useCallback((recipe: Recipe) => {
-    dispatch({ type: 'ADD_BOOKMARK', payload: recipe });
-  }, []);
+  const addBookmark = useCallback(
+    (recipe: Recipe) => {
+      dispatch({ type: 'ADD_BOOKMARK', payload: recipe });
+      if (session) {
+        fetch('/api/bookmarks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sourceId: recipe.id, snapshot: recipe }),
+        }).catch(() => {});
+      } else {
+        const current = loadBookmarksFromStorage();
+        saveBookmarksToStorage([...current, recipe]);
+      }
+    },
+    [session]
+  );
 
-  const removeBookmark = useCallback((id: string) => {
-    dispatch({ type: 'REMOVE_BOOKMARK', payload: id });
-  }, []);
+  const removeBookmark = useCallback(
+    (id: string) => {
+      dispatch({ type: 'REMOVE_BOOKMARK', payload: id });
+      if (session) {
+        fetch(`/api/bookmarks?sourceId=${id}`, { method: 'DELETE' }).catch(() => {});
+      } else {
+        const current = loadBookmarksFromStorage();
+        saveBookmarksToStorage(current.filter(b => b.id !== id));
+      }
+    },
+    [session]
+  );
 
   const uploadRecipe = useCallback(
     async (newRecipe: Record<string, string>) => {
+      if (!session) throw new Error('Please sign in to upload a recipe.');
+
       const ingredients = Object.entries(newRecipe)
         .filter(([key, val]) => key.startsWith('ingredient') && val !== '')
         .map(([, val]) => {
@@ -269,23 +329,28 @@ export function RecipeProvider({ children }: { children: ReactNode }) {
           return { quantity: quantity ? +quantity : null, unit, description };
         });
 
-      const recipeData = {
-        title: newRecipe.title,
-        source_url: newRecipe.sourceUrl,
-        image_url: newRecipe.image,
-        publisher: newRecipe.publisher,
-        cooking_time: +newRecipe.cookingTime,
-        servings: +newRecipe.servings,
-        ingredients,
-      };
+      const res = await fetch('/api/recipes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: newRecipe.title,
+          sourceUrl: newRecipe.sourceUrl,
+          image: newRecipe.image,
+          publisher: newRecipe.publisher,
+          cookingTime: +newRecipe.cookingTime,
+          servings: +newRecipe.servings,
+          ingredients,
+        }),
+      });
 
-      const data = await ajax(`${API_URL}?key=${KEY}`, recipeData);
-      const recipe = createRecipeObject(data);
-      dispatch({ type: 'ADD_BOOKMARK', payload: recipe });
-      dispatch({ type: 'LOAD_RECIPE_SUCCESS', payload: { ...recipe, bookmarked: true } });
+      if (!res.ok) throw new Error('Failed to upload recipe. Please try again.');
+
+      const { recipe } = await res.json();
       dispatch({ type: 'ADD_LOCAL_RECIPE', payload: { ...recipe, bookmarked: true } });
+      dispatch({ type: 'LOAD_RECIPE_SUCCESS', payload: { ...recipe, bookmarked: true } });
+      addBookmark(recipe);
     },
-    []
+    [session, addBookmark]
   );
 
   return (
@@ -300,7 +365,6 @@ export function RecipeProvider({ children }: { children: ReactNode }) {
         addBookmark,
         removeBookmark,
         uploadRecipe,
-        initBookmarks,
       }}
     >
       {children}

@@ -1,6 +1,7 @@
 'use client'
 
 import { Fragment, useRef, useState } from 'react'
+import { useSession, signIn } from 'next-auth/react'
 import { useRecipe } from '@/context/RecipeContext'
 import { MODAL_CLOSE_SEC } from '@/lib/config'
 
@@ -10,6 +11,7 @@ type Props = {
 
 export default function AddRecipeModal({ onClose }: Props) {
   const { uploadRecipe } = useRecipe()
+  const { data: session } = useSession()
   const formRef = useRef<HTMLFormElement>(null)
   const [status, setStatus] = useState<
     'idle' | 'loading' | 'success' | 'error'
@@ -49,7 +51,24 @@ export default function AddRecipeModal({ onClose }: Props) {
           &times;
         </button>
 
-        {status === 'loading' && (
+        {!session && (
+          <div className='flex flex-col items-center gap-[2rem] px-[4rem] py-[5rem]'>
+            <svg className='h-[4rem] w-[4rem] fill-[#f38e82]'>
+              <use href='/icons.svg#icon-user' />
+            </svg>
+            <p className='text-[1.8rem] font-semibold text-center'>
+              Please sign in to upload a recipe.
+            </p>
+            <button
+              onClick={() => signIn('google')}
+              className='flex items-center gap-[0.8rem] px-[3rem] py-[1.2rem] bg-gradient-to-br from-[#fbdb89] to-[#f48982] rounded-full text-white uppercase font-semibold text-[1.4rem] border-none cursor-pointer transition-all duration-200 hover:scale-105 focus:outline-none'
+            >
+              Sign in
+            </button>
+          </div>
+        )}
+
+        {session && status === 'loading' && (
           <div className='my-[5rem] mx-auto text-center'>
             <svg className='h-[6rem] w-[6rem] fill-[#f38e82] animate-spin-slow'>
               <use href='/icons.svg#icon-loader' />
@@ -57,7 +76,7 @@ export default function AddRecipeModal({ onClose }: Props) {
           </div>
         )}
 
-        {status === 'success' && (
+        {session && status === 'success' && (
           <div className='flex max-w-[40rem] mx-auto px-[4rem] py-[5rem]'>
             <svg className='h-[3rem] w-[3rem] fill-[#f38e82] -translate-y-[0.3rem]'>
               <use href='/icons.svg#icon-smile' />
@@ -68,7 +87,7 @@ export default function AddRecipeModal({ onClose }: Props) {
           </div>
         )}
 
-        {status === 'error' && (
+        {session && status === 'error' && (
           <div className='flex max-w-[40rem] mx-auto px-[4rem] py-[5rem]'>
             <svg className='h-[3rem] w-[3rem] fill-[#f38e82] -translate-y-[0.3rem]'>
               <use href='/icons.svg#icon-alert-triangle' />
@@ -79,7 +98,7 @@ export default function AddRecipeModal({ onClose }: Props) {
           </div>
         )}
 
-        {status === 'idle' && (
+        {session && status === 'idle' && (
           <form
             ref={formRef}
             onSubmit={handleSubmit}

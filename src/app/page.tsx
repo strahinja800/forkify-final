@@ -8,13 +8,11 @@ import Recipe from '@/components/Recipe';
 import AddRecipeModal from '@/components/AddRecipeModal';
 
 export default function Home() {
-  const { loadRecipe, initBookmarks } = useRecipe();
+  const { loadRecipe } = useRecipe();
   const [activeId, setActiveId] = useState('');
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
-    initBookmarks();
-
     function handleHash() {
       const id = window.location.hash.slice(1);
       if (id) {
@@ -26,7 +24,7 @@ export default function Home() {
     handleHash();
     window.addEventListener('hashchange', handleHash);
     return () => window.removeEventListener('hashchange', handleHash);
-  }, [loadRecipe, initBookmarks]);
+  }, [loadRecipe]);
 
   return (
     <div className="forkify-container">
