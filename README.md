@@ -1,36 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Forkify
+
+A recipe search and bookmarking app built with Next.js 16 and React 19. Search over 1,000,000 recipes, adjust servings, bookmark your favorites, and upload your own recipes.
+
+## Features
+
+- Search recipes via the [Forkify API](https://forkify-api.jonas.io)
+- Browse 12 curated recipes available without any search
+- View full recipe details with ingredients and directions
+- Adjust serving sizes with automatic ingredient scaling
+- Bookmark recipes — saved to localStorage
+- Upload your own recipes (automatically added to the sidebar and bookmarks)
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Tech Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- **Next.js 16** / **React 19**
+- **TypeScript**
+- **Tailwind CSS v4**
+- **Forkify API v2** — recipe data
 
-## Learn More
+## Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+  app/             # Root layout and single page route
+  components/      # Header, SearchResults, Recipe, PreviewItem, Bookmarks, AddRecipeModal
+  context/         # RecipeContext — global state via useReducer
+  lib/             # api.ts (fetch wrapper), config.ts (constants), localRecipes.ts (hardcoded recipes)
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Uploading a Recipe
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Ingredients must follow the format: `Quantity,Unit,Description`
+Example: `2,cups,all-purpose flour`
 
-## Deploy on Vercel
+Leave Quantity empty if not applicable: `,pinch,salt`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Environment
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+No `.env` file needed — the API key is bundled in `src/lib/config.ts` and is the public demo key from the original Forkify course project.
