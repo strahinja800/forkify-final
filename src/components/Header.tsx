@@ -84,7 +84,7 @@ export default function Header({ activeId, onAddRecipeClick, onAuthClick }: Prop
                 </svg>
                 <span>Bookmarks</span>
               </button>
-              <div className='absolute right-[-2.5rem] z-10 w-[40rem] bg-white shadow-[0_0.8rem_5rem_2rem_rgba(97,85,81,0.1)] py-[1rem] invisible opacity-0 transition-all duration-500 group-hover:visible group-hover:opacity-100'>
+              <div className='absolute right-[-2.5rem] z-50 w-[40rem] bg-white shadow-[0_0.8rem_5rem_2rem_rgba(97,85,81,0.1)] py-[1rem] invisible opacity-0 transition-all duration-500 group-hover:visible group-hover:opacity-100'>
                 <Bookmarks activeId={activeId} />
               </div>
             </li>

@@ -199,6 +199,11 @@ export function RecipeProvider({ children }: { children: ReactNode }) {
     localRecipesRef.current = state.localRecipes
   }, [state.localRecipes])
 
+  const bookmarksRef = useRef(state.bookmarks)
+  useEffect(() => {
+    bookmarksRef.current = state.bookmarks
+  }, [state.bookmarks])
+
   useEffect(() => {
     if (status === 'loading') return
 
@@ -231,10 +236,9 @@ export function RecipeProvider({ children }: { children: ReactNode }) {
   const loadRecipe = useCallback(async (id: string) => {
     const local = localRecipesRef.current.find(r => r.id === id)
     if (local) {
-      const bookmarks: Recipe[] = loadBookmarksFromStorage()
       dispatch({
         type: 'LOAD_RECIPE_SUCCESS',
-        payload: { ...local, bookmarked: bookmarks.some(b => b.id === id) },
+        payload: { ...local, bookmarked: bookmarksRef.current.some(b => b.id === id) },
       })
       return
     }
@@ -254,8 +258,7 @@ export function RecipeProvider({ children }: { children: ReactNode }) {
         ingredients: recipe.ingredients as Ingredient[],
         ...(recipe.key ? { key: recipe.key as string } : {}),
       }
-      const bookmarks: Recipe[] = loadBookmarksFromStorage()
-      loaded.bookmarked = bookmarks.some(b => b.id === id)
+      loaded.bookmarked = bookmarksRef.current.some(b => b.id === id)
       dispatch({ type: 'LOAD_RECIPE_SUCCESS', payload: loaded })
     } catch (err) {
       dispatch({ type: 'LOAD_RECIPE_ERROR', payload: (err as Error).message })
