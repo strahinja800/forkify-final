@@ -1,15 +1,16 @@
 'use client'
 
 import { Fragment, useRef, useState } from 'react'
-import { useSession, signIn } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import { useRecipe } from '@/context/RecipeContext'
 import { MODAL_CLOSE_SEC } from '@/lib/config'
 
 type Props = {
   onClose: () => void
+  onSignInClick: () => void
 }
 
-export default function AddRecipeModal({ onClose }: Props) {
+export default function AddRecipeModal({ onClose, onSignInClick }: Props) {
   const { uploadRecipe } = useRecipe()
   const { data: session } = useSession()
   const formRef = useRef<HTMLFormElement>(null)
@@ -60,7 +61,7 @@ export default function AddRecipeModal({ onClose }: Props) {
               Please sign in to upload a recipe.
             </p>
             <button
-              onClick={() => signIn('google')}
+              onClick={onSignInClick}
               className='flex items-center gap-[0.8rem] px-[3rem] py-[1.2rem] bg-gradient-to-br from-[#fbdb89] to-[#f48982] rounded-full text-white uppercase font-semibold text-[1.4rem] border-none cursor-pointer transition-all duration-200 hover:scale-105 focus:outline-none'
             >
               Sign in

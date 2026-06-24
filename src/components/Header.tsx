@@ -5,18 +5,17 @@ import { useRef, useState } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import { useRecipe } from '@/context/RecipeContext'
 import Bookmarks from './Bookmarks'
-import AuthModal from './AuthModal'
 
 type Props = {
   activeId: string
   onAddRecipeClick: () => void
+  onAuthClick: () => void
 }
 
-export default function Header({ activeId, onAddRecipeClick }: Props) {
+export default function Header({ activeId, onAddRecipeClick, onAuthClick }: Props) {
   const { loadSearchResults } = useRecipe()
   const { data: session } = useSession()
   const inputRef = useRef<HTMLInputElement>(null)
-  const [showAuth, setShowAuth] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [showSignOutConfirm, setShowSignOutConfirm] = useState(false)
 
@@ -158,7 +157,7 @@ export default function Header({ activeId, onAddRecipeClick }: Props) {
                 </>
               ) : (
                 <button
-                  onClick={() => setShowAuth(true)}
+                  onClick={onAuthClick}
                   className='flex items-center gap-[0.8rem] px-[2rem] py-[1rem] bg-gradient-to-br from-[#fbdb89] to-[#f48982] rounded-full text-white uppercase font-semibold text-[1.2rem] border-none cursor-pointer transition-all duration-200 hover:scale-105 focus:outline-none'
                 >
                   <svg className='h-[1.6rem] w-[1.6rem] fill-white'>
@@ -172,7 +171,6 @@ export default function Header({ activeId, onAddRecipeClick }: Props) {
         </nav>
       </header>
 
-      {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}
     </>
   )
 }
