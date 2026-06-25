@@ -12,7 +12,6 @@ import {
 import { useSession } from 'next-auth/react'
 import { ajax } from '@/lib/api'
 import { API_URL, KEY, RES_PER_PAGE } from '@/lib/config'
-import { LOCAL_RECIPES } from '@/lib/localRecipes'
 
 export type Ingredient = {
   quantity: number | null
@@ -90,7 +89,7 @@ const initialState: State = {
   recipe: null,
   search: { query: '', results: [], page: 1, resultsPerPage: RES_PER_PAGE },
   bookmarks: [],
-  localRecipes: LOCAL_RECIPES,
+  localRecipes: [],
   loading: false,
   error: null,
   searchLoading: false,
@@ -108,6 +107,7 @@ function reducer(state: State, action: Action): State {
       return {
         ...state,
         searchLoading: true,
+        error: null,
         search: { ...state.search, query: action.payload },
       }
     case 'SEARCH_SUCCESS':
@@ -170,7 +170,7 @@ function reducer(state: State, action: Action): State {
     case 'ADD_LOCAL_RECIPE':
       return { ...state, localRecipes: [action.payload, ...state.localRecipes] }
     case 'RESET_LOCAL_RECIPES':
-      return { ...state, localRecipes: LOCAL_RECIPES }
+      return { ...state, localRecipes: [] }
     default:
       return state
   }
@@ -270,7 +270,7 @@ export function RecipeProvider({ children }: { children: ReactNode }) {
     try {
       const data = await ajax(`${API_URL}?search=${query}&key=${KEY}`)
       const results: RecipePreview[] = (
-        data.data.recipes as Record<string, unknown>[]
+        (data.data?.recipes ?? []) as Record<string, unknown>[]
       ).map(rec => ({
         id: rec.id as string,
         title: rec.title as string,
