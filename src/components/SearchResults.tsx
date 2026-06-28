@@ -27,6 +27,21 @@ export default function SearchResults({ activeId }: Props) {
     );
   }
 
+  if (state.error && search.query && search.results.length === 0) {
+    return (
+      <div className="pt-[3rem] flex flex-col" style={{ gridArea: 'list' }}>
+        <div className="flex max-w-[40rem] mx-auto px-[4rem] py-[5rem]">
+          <svg className="h-[3rem] w-[3rem] fill-[#f38e82] -translate-y-[0.3rem]">
+            <use href="/icons.svg#icon-alert-triangle" />
+          </svg>
+          <p className="ml-[1.5rem] text-[1.8rem] leading-relaxed font-semibold">
+            Something went wrong. Please try again!
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   if (search.results.length === 0 && search.query) {
     return (
       <div className="pt-[3rem] flex flex-col" style={{ gridArea: 'list' }}>
@@ -44,28 +59,15 @@ export default function SearchResults({ activeId }: Props) {
 
   if (search.results.length === 0) {
     return (
-      <div className="py-[3rem] flex flex-col h-full" style={{ gridArea: 'list' }}>
-        <ul className="list-none mb-[2rem]">
-          {state.localRecipes.map(recipe => (
-            <PreviewItem
-              key={recipe.id}
-              recipe={recipe}
-              activeId={activeId}
-            />
-          ))}
-        </ul>
-        <p className="text-[#918581] text-[1.2rem] px-[3.5rem] mt-auto pt-[4rem]">
-          &copy; Copyright by{' '}
-          <a
-            className="text-[#918581]"
-            target="_blank"
-            rel="noreferrer"
-            href="https://twitter.com/jonasschmedtman"
-          >
-            Jonas Schmedtmann
-          </a>
-          . Use for learning or your portfolio. Don&apos;t use to teach. Don&apos;t claim as your own.
-        </p>
+      <div className="flex flex-col h-full" style={{ gridArea: 'list' }}>
+        <div className="flex items-start gap-[1.5rem] px-[4rem] py-[5rem]">
+          <svg className="h-[2.4rem] w-[2.4rem] fill-[#f38e82] shrink-0 mt-[0.2rem]">
+            <use href="/icons.svg#icon-smile" />
+          </svg>
+          <p className="text-[1.4rem] text-[#918581] font-semibold leading-snug">
+            Search over 1,000,000 recipes above. Have fun!
+          </p>
+        </div>
       </div>
     );
   }

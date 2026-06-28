@@ -1,10 +1,11 @@
 'use client'
 
-import Image from 'next/image'
 import { useRef, useState } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import { useRecipe } from '@/context/RecipeContext'
 import Bookmarks from './Bookmarks'
+import Image from 'next/image'
+import Link from 'next/link'
 
 type Props = {
   activeId: string
@@ -12,7 +13,11 @@ type Props = {
   onAuthClick: () => void
 }
 
-export default function Header({ activeId, onAddRecipeClick, onAuthClick }: Props) {
+export default function Header({
+  activeId,
+  onAddRecipeClick,
+  onAuthClick,
+}: Props) {
   const { loadSearchResults } = useRecipe()
   const { data: session } = useSession()
   const inputRef = useRef<HTMLInputElement>(null)
@@ -33,14 +38,16 @@ export default function Header({ activeId, onAddRecipeClick, onAuthClick }: Prop
         className='flex items-center justify-between bg-grey-light-1'
         style={{ gridArea: 'head' }}
       >
-        <Image
-          src='/logo.png'
-          alt='forkify logo'
-          width={184}
-          height={46}
-          className='ml-16 h-[4.6rem] w-auto block'
-          priority
-        />
+        <Link href='/'>
+          <Image
+            src='/logo.png'
+            alt='forkify logo'
+            width={184}
+            height={46}
+            className='ml-16 h-[4.6rem] w-auto block'
+            priority
+          />
+        </Link>
 
         <form
           onSubmit={handleSearch}
@@ -100,7 +107,9 @@ export default function Header({ activeId, onAddRecipeClick, onAuthClick }: Prop
                       <use href='/icons.svg#icon-user' />
                     </svg>
                     <span>{session.user?.name ?? session.user?.email}</span>
-                    <svg className={`h-[1.2rem] w-[1.2rem] fill-[#918581] transition-transform duration-200 ${showUserMenu ? 'rotate-180' : ''}`}>
+                    <svg
+                      className={`h-[1.2rem] w-[1.2rem] fill-[#918581] transition-transform duration-200 ${showUserMenu ? 'rotate-180' : ''}`}
+                    >
                       <use href='/icons.svg#icon-triangle' />
                     </svg>
                   </button>
@@ -113,7 +122,10 @@ export default function Header({ activeId, onAddRecipeClick, onAuthClick }: Prop
                       />
                       <div className='absolute right-0 top-[calc(100%+0.4rem)] z-[60] bg-white rounded-[9px] shadow-[0_0.8rem_3rem_rgba(97,85,81,0.15)] py-[0.6rem] min-w-[14rem] overflow-hidden'>
                         <button
-                          onClick={() => { setShowUserMenu(false); setShowSignOutConfirm(true) }}
+                          onClick={() => {
+                            setShowUserMenu(false)
+                            setShowSignOutConfirm(true)
+                          }}
                           className='w-full flex items-center gap-[0.8rem] px-[1.6rem] py-[1rem] text-[1.3rem] font-semibold text-[#615551] bg-transparent border-none cursor-pointer text-left hover:bg-[#f9f5f3] transition-colors duration-150 focus:outline-none'
                         >
                           <svg className='h-[1.6rem] w-[1.6rem] fill-[#f38e82]'>
@@ -135,8 +147,12 @@ export default function Header({ activeId, onAddRecipeClick, onAuthClick }: Prop
                         <svg className='h-[4rem] w-[4rem] fill-[#f38e82] mx-auto mb-[1.5rem]'>
                           <use href='/icons.svg#icon-logout' />
                         </svg>
-                        <p className='text-[1.8rem] font-semibold text-[#615551] mb-[0.6rem]'>Sign out?</p>
-                        <p className='text-[1.4rem] text-[#918581] mb-[3rem]'>Are you sure you want to sign out?</p>
+                        <p className='text-[1.8rem] font-semibold text-[#615551] mb-[0.6rem]'>
+                          Sign out?
+                        </p>
+                        <p className='text-[1.4rem] text-[#918581] mb-[3rem]'>
+                          Are you sure you want to sign out?
+                        </p>
                         <div className='flex gap-[1.2rem] justify-center'>
                           <button
                             onClick={() => setShowSignOutConfirm(false)}
@@ -170,7 +186,6 @@ export default function Header({ activeId, onAddRecipeClick, onAuthClick }: Prop
           </ul>
         </nav>
       </header>
-
     </>
   )
 }
