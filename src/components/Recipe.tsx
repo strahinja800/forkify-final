@@ -24,18 +24,40 @@ export default function Recipe() {
   }
 
   if (error) {
+    const currentId =
+      typeof window !== 'undefined' ? window.location.hash.slice(1) : ''
+    const isBookmarked = state.bookmarks.some(b => b.id === currentId)
+    const is400 = error?.includes('400')
+
     return (
       <div
         className='bg-[#f9f5f3]'
         style={{ gridArea: 'recipe' }}
       >
-        <div className='flex max-w-[40rem] mx-auto px-[4rem] py-[5rem]'>
-          <svg className='h-[3rem] w-[3rem] fill-[#f38e82] -translate-y-[0.3rem]'>
-            <use href='/icons.svg#icon-alert-triangle' />
-          </svg>
-          <p className='ml-[1.5rem] text-[1.8rem] leading-relaxed font-semibold'>
-            {error}
-          </p>
+        <div className='flex flex-col max-w-[40rem] mx-auto px-[4rem] py-[5rem] gap-[2rem]'>
+          <div className='flex'>
+            <svg className='h-[3rem] w-[3rem] fill-[#f38e82] shrink-0 -translate-y-[0.3rem]'>
+              <use href='/icons.svg#icon-alert-triangle' />
+            </svg>
+            <p className='ml-[1.5rem] text-[1.8rem] leading-relaxed font-semibold'>
+              {is400 ? 'This recipe no longer exists.' : error}
+            </p>
+          </div>
+          {is400 && isBookmarked && (
+            <button
+              type='button'
+              onClick={() => {
+                removeBookmark(currentId)
+                window.location.hash = ''
+              }}
+              className='self-start flex items-center gap-[0.8rem] px-[2rem] py-[1rem] bg-gradient-to-br from-[#fbdb89] to-[#f48982] rounded-full text-white text-[1.3rem] font-semibold uppercase border-none cursor-pointer hover:scale-105 transition-all duration-200'
+            >
+              <svg className='h-[1.8rem] w-[1.8rem] fill-white'>
+                <use href='/icons.svg#icon-bookmark' />
+              </svg>
+              Remove from bookmarks
+            </button>
+          )}
         </div>
       </div>
     )

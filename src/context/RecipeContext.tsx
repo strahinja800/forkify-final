@@ -72,10 +72,22 @@ type Action =
   | { type: 'ADD_LOCAL_RECIPE'; payload: Recipe }
   | { type: 'RESET_LOCAL_RECIPES' }
 
+function decodeHtml(str: string): string {
+  if (typeof document === 'undefined') return str
+  const txt = document.createElement('textarea')
+  txt.innerHTML = str
+  return txt.value
+}
+
 function loadBookmarksFromStorage(): Recipe[] {
   try {
     const stored = localStorage.getItem('bookmarks')
-    return stored ? JSON.parse(stored) : []
+    const parsed: Recipe[] = stored ? JSON.parse(stored) : []
+    const valid = parsed.filter(b => !b.id.startsWith('local-'))
+    if (valid.length !== parsed.length) {
+      localStorage.setItem('bookmarks', JSON.stringify(valid))
+    }
+    return valid
   } catch {
     return []
   }
@@ -249,8 +261,8 @@ export function RecipeProvider({ children }: { children: ReactNode }) {
       const { recipe } = data.data as { recipe: Record<string, unknown> }
       const loaded: Recipe = {
         id: recipe.id as string,
-        title: recipe.title as string,
-        publisher: recipe.publisher as string,
+        title: decodeHtml(recipe.title as string),
+        publisher: decodeHtml(recipe.publisher as string),
         sourceUrl: recipe.source_url as string,
         image: recipe.image_url as string,
         servings: recipe.servings as number,
@@ -273,8 +285,8 @@ export function RecipeProvider({ children }: { children: ReactNode }) {
         (data.data?.recipes ?? []) as Record<string, unknown>[]
       ).map(rec => ({
         id: rec.id as string,
-        title: rec.title as string,
-        publisher: rec.publisher as string,
+        title: decodeHtml(rec.title as string),
+        publisher: decodeHtml(rec.publisher as string),
         image: rec.image_url as string,
         ...(rec.key ? { key: rec.key as string } : {}),
       }))
