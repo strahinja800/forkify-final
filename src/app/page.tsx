@@ -7,12 +7,18 @@ import SearchResults from '@/components/SearchResults'
 import Recipe from '@/components/Recipe'
 import AddRecipeModal from '@/components/AddRecipeModal'
 import AuthModal from '@/components/AuthModal'
+import {
+  Drawer,
+  DrawerContent,
+  DrawerTitle,
+} from '@/components/ui/drawer'
 
 export default function Home() {
   const { loadRecipe, loadSearchResults } = useRecipe()
   const [activeId, setActiveId] = useState('')
   const [showModal, setShowModal] = useState(false)
   const [showAuth, setShowAuth] = useState(false)
+  const [drawerOpen, setDrawerOpen] = useState(false)
 
   useEffect(() => {
     function handleHash() {
@@ -20,6 +26,7 @@ export default function Home() {
       if (id) {
         setActiveId(id)
         loadRecipe(id)
+        setDrawerOpen(false)
       }
     }
 
@@ -38,9 +45,24 @@ export default function Home() {
         activeId={activeId}
         onAddRecipeClick={() => setShowModal(true)}
         onAuthClick={() => setShowAuth(true)}
+        onOpenSearch={() => setDrawerOpen(true)}
       />
-      <SearchResults activeId={activeId} />
+
+      {/* Desktop sidebar — hidden on mobile */}
+      <div className='hidden md:block' style={{ gridArea: 'list', overflow: 'auto' }}>
+        <SearchResults activeId={activeId} />
+      </div>
+
+      {/* Mobile drawer */}
+      <Drawer open={drawerOpen} onOpenChange={setDrawerOpen} direction='left'>
+        <DrawerContent className='w-[85vw] max-w-[40rem] bg-white p-0 overflow-y-auto'>
+          <DrawerTitle className='sr-only'>Search Results</DrawerTitle>
+          <SearchResults activeId={activeId} />
+        </DrawerContent>
+      </Drawer>
+
       <Recipe />
+
       {showModal && (
         <AddRecipeModal
           onClose={() => setShowModal(false)}
