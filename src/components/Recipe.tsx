@@ -24,7 +24,8 @@ export default function Recipe() {
   }
 
   if (error) {
-    const currentId = typeof window !== 'undefined' ? window.location.hash.slice(1) : ''
+    const currentId =
+      typeof window !== 'undefined' ? window.location.hash.slice(1) : ''
     const isBookmarked = state.bookmarks.some(b => b.id === currentId)
     const is400 = error?.includes('400')
 
@@ -39,13 +40,12 @@ export default function Recipe() {
               <use href='/icons.svg#icon-alert-triangle' />
             </svg>
             <p className='ml-[1.5rem] text-[1.8rem] leading-relaxed font-semibold'>
-              {is400
-                ? 'This recipe no longer exists.'
-                : error}
+              {is400 ? 'This recipe no longer exists.' : error}
             </p>
           </div>
           {is400 && isBookmarked && (
             <button
+              type='button'
               onClick={() => {
                 removeBookmark(currentId)
                 window.location.hash = ''
