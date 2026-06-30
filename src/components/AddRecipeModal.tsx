@@ -44,7 +44,12 @@ export default function AddRecipeModal({ onClose, onSignInClick }: Props) {
         onClick={onClose}
         className='fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] transition-all duration-500'
       />
-      <div className='fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[95vw] max-w-[100rem] max-h-[90vh] overflow-y-auto bg-white rounded-[9px] px-[3rem] md:px-[6rem] py-[5rem] shadow-[0_4rem_6rem_rgba(0,0,0,0.25)] z-[1000] transition-all duration-500'>
+      <div
+        role='dialog'
+        aria-modal='true'
+        aria-label='Add recipe'
+        className='fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[95vw] max-w-[100rem] max-h-[90vh] overflow-y-auto bg-white rounded-[9px] px-[3rem] md:px-[6rem] py-[5rem] shadow-[0_4rem_6rem_rgba(0,0,0,0.25)] z-[1000] transition-all duration-500'
+      >
         <button
           onClick={onClose}
           className='absolute top-[0.5rem] right-[1.6rem] text-[3.5rem] font-[inherit] text-inherit bg-transparent border-none cursor-pointer focus:outline-none'
