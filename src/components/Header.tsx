@@ -64,7 +64,7 @@ export default function Header({
 
         <form
           onSubmit={handleSearch}
-          className='flex items-center pl-4 md:pl-12 mx-2 md:mx-0 flex-1 md:flex-none bg-white rounded-full transition-all duration-300 focus-within:-translate-y-0.5 focus-within:shadow-[0_0.7rem_3rem_rgba(97,85,81,0.08)]'
+          className='flex items-center pl-3 md:pl-12 mx-1 md:mx-0 min-w-0 flex-1 md:flex-none bg-white rounded-full transition-all duration-300 focus-within:-translate-y-0.5 focus-within:shadow-[0_0.7rem_3rem_rgba(97,85,81,0.08)]'
         >
           <input
             ref={inputRef}
@@ -74,12 +74,12 @@ export default function Header({
           />
           <button
             type='submit'
-            className='flex items-center gap-[0.8rem] px-[3rem] py-[1rem] bg-gradient-to-br from-[#fbdb89] to-[#f48982] rounded-full text-white uppercase font-semibold text-[1.3rem] border-none cursor-pointer transition-all duration-200 hover:scale-105 focus:outline-none'
+            className='flex items-center gap-[0.8rem] px-[1.5rem] sm:px-[3rem] py-[1rem] bg-gradient-to-br from-[#fbdb89] to-[#f48982] rounded-full text-white uppercase font-semibold text-[1.3rem] border-none cursor-pointer transition-all duration-200 hover:scale-105 focus:outline-none shrink-0'
           >
             <svg className='h-[1.8rem] w-[1.8rem] fill-white'>
               <use href='/icons.svg#icon-search' />
             </svg>
-            <span>Search</span>
+            <span className='hidden sm:inline'>Search</span>
           </button>
         </form>
 

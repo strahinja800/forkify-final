@@ -44,7 +44,12 @@ export default function AddRecipeModal({ onClose, onSignInClick }: Props) {
         onClick={onClose}
         className='fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] transition-all duration-500'
       />
-      <div className='fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[100rem] bg-white rounded-[9px] px-[6rem] py-[5rem] shadow-[0_4rem_6rem_rgba(0,0,0,0.25)] z-[1000] transition-all duration-500'>
+      <div
+        role='dialog'
+        aria-modal='true'
+        aria-label='Add recipe'
+        className='fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[95vw] max-w-[100rem] max-h-[90vh] overflow-y-auto bg-white rounded-[9px] px-[3rem] md:px-[6rem] py-[5rem] shadow-[0_4rem_6rem_rgba(0,0,0,0.25)] z-[1000] transition-all duration-500'
+      >
         <button
           onClick={onClose}
           className='absolute top-[0.5rem] right-[1.6rem] text-[3.5rem] font-[inherit] text-inherit bg-transparent border-none cursor-pointer focus:outline-none'
@@ -103,7 +108,7 @@ export default function AddRecipeModal({ onClose, onSignInClick }: Props) {
           <form
             ref={formRef}
             onSubmit={handleSubmit}
-            className='grid grid-cols-2 gap-x-[6rem] gap-y-[4rem]'
+            className='grid grid-cols-1 md:grid-cols-2 gap-x-[6rem] gap-y-[4rem]'
           >
             <div className='grid grid-cols-[1fr_2.8fr] items-center gap-[1.5rem]'>
               <h3 className='col-span-full text-[2.25rem] font-bold uppercase mb-[1rem]'>

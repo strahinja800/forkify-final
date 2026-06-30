@@ -108,8 +108,8 @@ export default function Recipe() {
       </figure>
 
       {/* Details */}
-      <div className='flex items-center px-[8rem] pt-[7.5rem] pb-[3.5rem]'>
-        <div className='flex items-center text-[1.65rem] uppercase mr-[4.5rem]'>
+      <div className='flex flex-wrap items-center px-[3rem] md:px-[8rem] pt-[7.5rem] pb-[3.5rem] gap-y-[1.5rem]'>
+        <div className='flex items-center text-[1.65rem] uppercase mr-[3rem] md:mr-[4.5rem]'>
           <svg className='h-[2.35rem] w-[2.35rem] fill-[#f38e82] mr-[1.15rem]'>
             <use href='/icons.svg#icon-clock' />
           </svg>
